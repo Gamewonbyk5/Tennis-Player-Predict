@@ -1,0 +1,58 @@
+---
+title: "Return_predict"
+output: html_document
+---
+
+##1	目的
+男子プロテニス協会が公開するトッププロ96名のサーブとリターンのデータを用いて、サーブとリターンそれぞれにおいての上位半数と下位半数の線形判別を行う。
+
+##2	データの出所
+Official Site of Men's Professional Tennis(2018/12/18)
+(URL:https://www.atptour.com/)
+
+##3 変数の確認
+```{r}
+library(readxl)
+Tennis_FinalReport<-read_excel("/Users/keigo/Desktop/dataanalysis/Tennis_FinalReport.xlsx")
+str(Tennis_FinalReport)
+```
+
+##4 データの一部の表示
+```{r}
+head(Tennis_FinalReport)
+```
+
+##5 リターンデータ基本分析
+```{r}
+boxplot(Tennis_FinalReport$"1st_Serve" ~ Tennis_FinalReport$"Return_Group",data=Tennis_FinalReport)
+boxplot(Tennis_FinalReport$"1st_Serve_Points_Won" ~ Tennis_FinalReport$"Return_Group",data=Tennis_FinalReport)
+boxplot(Tennis_FinalReport$"2nd_Serve_Points_Won" ~ Tennis_FinalReport$"Return_Group",data=Tennis_FinalReport)
+boxplot(Tennis_FinalReport$"Avg_Aces" ~ Tennis_FinalReport$"Return_Group",data=Tennis_FinalReport)
+boxplot(Tennis_FinalReport$"Avg_ Double_Faults" ~ Tennis_FinalReport$"Return_Group",data=Tennis_FinalReport)
+boxplot(Tennis_FinalReport$"1st_Serve_Return_Points_Won" ~ Tennis_FinalReport$"Return_Group",data=Tennis_FinalReport)
+boxplot(Tennis_FinalReport$"2nd_Serve_Return_Points_Won" ~ Tennis_FinalReport$"Return_Group",data=Tennis_FinalReport)
+boxplot(Tennis_FinalReport$"Break_Points_Converted" ~ Tennis_FinalReport$"Return_Group",data=Tennis_FinalReport)
+```
+
+##6 リターンデータ判別分析
+```{r}
+library(MASS)
+Return_Group_Result<- lda(Tennis_FinalReport$"Return_Group" ~ + Tennis_FinalReport$"1st_Serve" + Tennis_FinalReport$"1st_Serve_Points_Won" + Tennis_FinalReport$"2nd_Serve_Points_Won"  + Tennis_FinalReport$"Avg_Aces" + Tennis_FinalReport$"Avg_ Double_Faults" + Tennis_FinalReport$"1st_Serve_Return_Points_Won" + Tennis_FinalReport$"2nd_Serve_Return_Points_Won" + Tennis_FinalReport$"Break_Points_Converted",data=Tennis_FinalReport)
+Return_Group_Result
+plot(Return_Group_Result,dimen=1)
+```
+
+###7 リターンTOP48か否かの推定
+```{r}
+print(Return_Group_Result$scaling)
+Return_Group_Predict<-predict(Return_Group_Result,data=Tennis_FinalReport_Test)
+str(Return_Group_Predict)
+```
+
+####結果の整理
+```{r}
+if(nlevels(Return_Group_Predict$class)==2)
+{hist(Return_Group_Predict$x)}
+if(nlevels(Return_Group_Predict$class)>2)
+{plot(Return_Group_Predict$x)}
+```
